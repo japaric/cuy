@@ -1,0 +1,5 @@
+---
+source: packages/rt-tests/tests/bins.rs
+expression: stdout
+---
+

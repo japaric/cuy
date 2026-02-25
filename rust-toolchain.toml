@@ -1,0 +1,11 @@
+[toolchain]
+channel = "1.93.1"
+components = [
+    "clippy",
+    "llvm-tools",
+    "rust-analyzer",
+    "rust-src",
+    "rustfmt",
+]
+targets = [ "aarch64-unknown-none" ]
+profile = "minimal"

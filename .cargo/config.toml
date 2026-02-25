@@ -1,0 +1,16 @@
+[build]
+target = "aarch64-unknown-none"
+
+[target.aarch64-unknown-none]
+runner = [
+    "qemu-system-aarch64",
+    "-cpu", "neoverse-v1",
+    # "-machine", "virt", # boot in EL1
+    "-machine", "virt,virtualization=on", # boot in EL2
+    # "-machine", "virt,secure=on", # boot in EL3
+    "-nographic",
+    "-semihosting",
+    "-smp", "2", # NOTE unless booting in EL3, QEMU keeps all other cores halted out of reset
+    "-gdb", "tcp::12345", "-S", # start GDB server
+    "-kernel",
+]

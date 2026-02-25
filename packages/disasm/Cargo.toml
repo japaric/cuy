@@ -1,0 +1,3 @@
+[package]
+name = "disasm"
+edition = "2024"

@@ -1,0 +1,9 @@
+[package]
+name = "rt-tests"
+edition = "2024"
+
+[dependencies]
+insta.workspace = true
+
+[features]
+codecov = []

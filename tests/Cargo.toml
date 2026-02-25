@@ -1,0 +1,6 @@
+[workspace]
+resolver = "3"
+members = ["packages/*"]
+
+[workspace.dependencies]
+insta = { version = "1.46.3", default-features = false }

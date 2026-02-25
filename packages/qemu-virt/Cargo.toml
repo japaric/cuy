@@ -1,0 +1,3 @@
+[package]
+name = "qemu-virt"
+edition = "2024"
