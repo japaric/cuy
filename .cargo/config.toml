@@ -11,6 +11,6 @@ runner = [
     "-nographic",
     "-semihosting",
     "-smp", "2", # NOTE unless booting in EL3, QEMU keeps all other cores halted out of reset
-    "-gdb", "tcp::12345", "-S", # start GDB server
+    # "-gdb", "tcp::12345", "-S", # start GDB server
     "-kernel",
 ]
