@@ -1,0 +1,16 @@
+[package]
+edition = "2024"
+name = "testing"
+publish = false
+
+[lib]
+doctest = false
+
+[dependencies]
+pretty_assertions = "1.4.1"
+
+[features]
+codecov = []
+
+[workspace]
+# this should not be cross compiled so put it ins own workspace

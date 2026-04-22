@@ -1,4 +1,4 @@
-//@ boot-el3
+// runner: qemu-system-aarch64 -cpu neoverse-v1 -machine virt,secure=on -nographic -semihosting -kernel
 
 #![no_std]
 #![no_main]

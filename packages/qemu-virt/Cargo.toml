@@ -1,3 +1,11 @@
 [package]
 name = "qemu-virt"
 edition = "2024"
+
+[dev-dependencies]
+regs.path = "../regs"
+rt.path = "../rt"
+sh.path = "../sh"
+
+[features]
+codecov = ["sh/codecov"]

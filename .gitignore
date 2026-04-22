@@ -1,3 +1,2 @@
 *.profraw
-*.snap.new
-/target
+target

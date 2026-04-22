@@ -45,6 +45,11 @@ dependencies = [
 [[package]]
 name = "qemu-virt"
 version = "0.0.0"
+dependencies = [
+ "regs",
+ "rt",
+ "sh",
+]
 
 [[package]]
 name = "regs"
@@ -55,16 +60,6 @@ name = "rt"
 version = "0.0.0"
 dependencies = [
  "regs",
-]
-
-[[package]]
-name = "rt-tests"
-version = "0.0.0"
-dependencies = [
- "qemu-virt",
- "regs",
- "rt",
- "sh",
 ]
 
 [[package]]

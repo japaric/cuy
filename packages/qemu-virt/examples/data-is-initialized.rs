@@ -1,3 +1,5 @@
+// runner: qemu-system-aarch64 -cpu neoverse-v1 -machine virt -nographic -semihosting -kernel
+
 #![no_std]
 #![no_main]
 
