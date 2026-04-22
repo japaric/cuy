@@ -1,3 +1,4 @@
+// REQ000
 // runner: qemu-system-aarch64 -cpu cortex-a53 -machine virt -nographic -semihosting -kernel
 
 #![no_std]

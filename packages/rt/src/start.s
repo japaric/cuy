@@ -20,12 +20,12 @@ is_boot_core:
   ldr x0, =_boot_stack_end
   mov SP, x0
 
-  /* allow FPU/SIMD in EL1; codecov uses these kind of registers */
+  /* REQ001: allow FPU/SIMD in EL1; codecov uses these kind of registers */
   mrs x0, CPACR_EL1
   add x0, x0, #(3 << 20)
   msr CPACR_EL1, x0
 
-  /* zero bss */
+  /* REQ000: zero bss */
   ldr x0, =_bss_start
   ldr x1, =_bss_end
 1:
