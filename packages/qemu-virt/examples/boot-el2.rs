@@ -1,3 +1,4 @@
+//! check that the startup code can boot in EL2
 // runner: qemu-system-aarch64 -cpu cortex-a53 -machine virt,virtualization=on -nographic -semihosting -kernel
 
 #![no_std]

@@ -1,4 +1,4 @@
-// REQ001
+//! REQ001: check that the FPU can be used without raising an exception
 // runner: qemu-system-aarch64 -cpu cortex-a53 -machine virt -nographic -semihosting -kernel
 
 #![no_std]
@@ -21,6 +21,7 @@ fn main() -> ! {
 
     let z: f64;
     // use assembly to avoid computation at compile time
+    // SAFETY: pure operation that only involves CPU registers
     unsafe {
         asm!("fadd {:d}, {:d}, {:d}", out(vreg) z, in(vreg) x, in(vreg) y);
     }

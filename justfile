@@ -38,7 +38,7 @@ codecov:
   rm -f *.profraw
 
 clippy:
-  cargo clippy -- -D clippy::undocumented_unsafe_blocks -D warnings -D missing_docs
+  cargo clippy --examples --workspace -- -D clippy::undocumented_unsafe_blocks -D warnings -D missing_docs
 
 # runs `llvm-nm` on the disasm application
 nm *ARGS: build-disasm

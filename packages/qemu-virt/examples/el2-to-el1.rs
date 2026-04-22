@@ -1,3 +1,4 @@
+//! check that EL2 to EL1 transition works
 // FIXME does not work on earlier Cortex-A cores
 // runner: qemu-system-aarch64 -cpu cortex-a76 -machine virt,virtualization=on -nographic -semihosting -kernel
 
