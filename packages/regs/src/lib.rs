@@ -95,3 +95,23 @@ impl ELR_EL2 {
         }
     }
 }
+
+/// Stack pointer
+pub struct SP;
+
+impl SP {
+    /// Reads the Stack Pointer
+    #[inline(always)]
+    pub fn read() -> usize {
+        let value: usize;
+        // SAFETY: no side effects
+        unsafe {
+            asm!(
+                "MOV {}, SP",
+                out(reg) value,
+                options(nomem, pure),
+            )
+        }
+        value
+    }
+}

@@ -10,7 +10,7 @@ impl LinkerSection {
         Self { lower, higher }
     }
 
-    /// `.text` section
+    /// the `.text` section
     pub fn text() -> Self {
         unsafe extern "C" {
             static _text_lower: u8;
@@ -23,7 +23,7 @@ impl LinkerSection {
         }
     }
 
-    /// `.rodata` section
+    /// the `.rodata` section
     pub fn rodata() -> Self {
         unsafe extern "C" {
             static _rodata_lower: u8;
@@ -36,7 +36,7 @@ impl LinkerSection {
         }
     }
 
-    /// `.data` section
+    /// the `.data` section
     pub fn data() -> Self {
         unsafe extern "C" {
             static _data_lower: u8;
@@ -49,7 +49,7 @@ impl LinkerSection {
         }
     }
 
-    /// `.bss` section
+    /// the `.bss` section
     pub fn bss() -> Self {
         unsafe extern "C" {
             static _bss_lower: u8;
@@ -62,7 +62,20 @@ impl LinkerSection {
         }
     }
 
-    /// `.stack` section
+    /// the `.stack.boot` sub-section
+    pub fn boot_stack() -> Self {
+        unsafe extern "C" {
+            static _stack_lower: u8;
+            static _boot_stack_higher: u8;
+        }
+
+        Self {
+            lower: &raw const _stack_lower as usize,
+            higher: &raw const _boot_stack_higher as usize,
+        }
+    }
+
+    /// the `.stack` section
     pub fn stack() -> Self {
         unsafe extern "C" {
             static _stack_lower: u8;
@@ -88,5 +101,10 @@ impl LinkerSection {
     /// Returns the size of the linker section in bytes
     pub fn size(&self) -> usize {
         self.higher - self.lower
+    }
+
+    /// Checks whether the linker section contains the given `address`
+    pub fn contains(&self, address: usize) -> bool {
+        (self.lower..self.higher).contains(&address)
     }
 }
