@@ -26,6 +26,7 @@ is_boot_core:
   msr CPACR_EL1, x0
 
   /* REQ000: zero bss */
+  /* NOTE: this assumes the section is 8-byte aligned */
   ldr x0, =_bss_lower
   ldr x1, =_bss_higher
 1:

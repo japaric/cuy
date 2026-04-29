@@ -5,21 +5,28 @@ SECTIONS
   {
     _text_lower = .;
     *(.text.*);
-    _text_higher = ALIGN(64);
+    /* NOTE: this does NOT align the section to a 64-byte boundary as reported by `size` */
+    /* _text_higher = ALIGN(64); */
+    /* however, this does */
+    . = ALIGN(64);
+    /* this simply creates a binding; it has no effect on the section itself */
+    _text_higher = .;
   } >ro
 
   .rodata ALIGN(64) :
   {
     _rodata_lower = .;
     *(.rodata.*);
-    _rodata_higher = ALIGN(64);
+    . = ALIGN(64);
+    _rodata_higher = .;
   } >ro
 
   .data ALIGN(64) :
   {
     _data_lower = .;
     *(.data.*);
-    _data_higher = ALIGN(64);
+    . = ALIGN(64);
+    _data_higher = .;
   } >rw
 
   /* REQ000 */
@@ -27,7 +34,8 @@ SECTIONS
   {
     _bss_lower = .;
     *(.bss.*);
-    _bss_higher = ALIGN(64);
+    . = ALIGN(64);
+    _bss_higher = .;
   } >rw
 
   .stack (NOLOAD) : ALIGN(64)
@@ -36,6 +44,7 @@ SECTIONS
     KEEP(*(.stack.boot));
     . = ALIGN(64);
     _boot_stack_higher = .;
+
     *(.stack);
     _stack_higher = .;
   } >rw
@@ -49,6 +58,10 @@ SECTIONS
     *(.got);
   }
 }
+
+ASSERT(
+    _bss_lower % 8 == 0 && _bss_higher % 8 == 0 ,
+    ".bss section is not 8-byte aligned as assumed by startup code");
 
 ASSERT(
     _boot_stack_higher % 16 == 0,
