@@ -1,40 +1,41 @@
 SECTIONS
 {
-  .text :
+  /* REQQ002 align sections to 64-byte boundaries for MPU compatibility [ARM-R64/D6.1.1] */
+  .text ALIGN(64) :
   {
+    _text_lower = .;
     *(.text.*);
+    _text_higher = ALIGN(64);
   } >ro
 
-  .rodata :
+  .rodata ALIGN(64) :
   {
+    _rodata_lower = .;
     *(.rodata.*);
+    _rodata_higher = ALIGN(64);
   } >ro
 
-  .data :
+  .data ALIGN(64) :
   {
+    _data_lower = .;
     *(.data.*);
+    _data_higher = ALIGN(64);
   } >rw
 
   /* REQ000 */
-  /* aligned to 8-byte to optimize zero-ing loop */
-  .bss (NOLOAD) : ALIGN(8)
+  .bss (NOLOAD) : ALIGN(64)
   {
-    _bss_start = .;
+    _bss_lower = .;
     *(.bss.*);
-    . = ALIGN(8);
-    _bss_end = .;
+    _bss_higher = ALIGN(64);
   } >rw
 
-  /* the MPU usually operates on 4 KiB pages [citation needed] even if it can */
-  /* support granularity as fine as 64B [ARM-R64/D6.1.1] */
-  .stack (NOLOAD) : ALIGN(4K)
+  .stack (NOLOAD) : ALIGN(64)
   {
+    _stack_lower = .;
     /* TODO maybe make configurable; start with 4 KiB for the boot core */
     . += 4K;
-    _boot_stack_end = .;
-
-    *(.stack.*);
-    . = ALIGN(4K);
+    _stack_higher = .;
   } >rw
 
   /* discard non-debug sections unless there's a clear reason to */
