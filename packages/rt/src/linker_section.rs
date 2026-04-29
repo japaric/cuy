@@ -6,6 +6,10 @@ pub struct LinkerSection {
 }
 
 impl LinkerSection {
+    pub(crate) fn new(lower: usize, higher: usize) -> Self {
+        Self { lower, higher }
+    }
+
     /// `.text` section
     pub fn text() -> Self {
         unsafe extern "C" {

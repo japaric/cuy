@@ -6,7 +6,7 @@
 #![no_main]
 
 use regs::CurrentEL;
-use rt::StackMemory;
+use rt::stack_memory;
 
 rt::entry!(main);
 
@@ -17,7 +17,7 @@ fn main() -> ! {
         "this example must start in EL2"
     );
 
-    rt::drop_el(at_el1, StackMemory::reserve(1.try_into().unwrap()));
+    rt::drop_el(at_el1, stack_memory!(4 * 1024).unwrap());
 }
 
 extern "C" fn at_el1() -> ! {

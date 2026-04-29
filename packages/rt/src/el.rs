@@ -38,7 +38,7 @@ pub fn drop_el(f: extern "C" fn() -> !, stack_memory: StackMemory) -> ! {
         asm!(
             "eret",
             in("x0") f as *const () as usize,
-            in("x1") stack_memory.address(),
+            in("x1") stack_memory.higher(),
             options(nomem, noreturn),
         )
     }
