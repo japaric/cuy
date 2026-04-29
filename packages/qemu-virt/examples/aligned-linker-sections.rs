@@ -1,5 +1,5 @@
 //! REQ002 check that the linker sections are 64-byte aligned
-// runner: qemu-system-aarch64 -cpu cortex-a53 -machine virt -nographic -semihosting -kernel
+// runner: qemu-system-aarch64 -m 128 -cpu cortex-a53 -machine virt -nographic -semihosting -kernel
 
 #![no_std]
 #![no_main]

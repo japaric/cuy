@@ -1,6 +1,6 @@
 //! check that the .bss section is zeroed by the startup code
 // REQ000
-// runner: qemu-system-aarch64 -cpu cortex-a53 -machine virt -nographic -semihosting -kernel
+// runner: qemu-system-aarch64 -m 128 -cpu cortex-a53 -machine virt -nographic -semihosting -kernel
 
 #![no_std]
 #![no_main]

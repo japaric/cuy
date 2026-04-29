@@ -2,7 +2,7 @@ MEMORY
 {
   /* https://github.com/qemu/qemu/blob/master/hw/arm/virt.c */
   FLASH : ORIGIN = 0x00000000, LENGTH = 128M
-  /* TODO is 128 MiB the default RAM size? */
+  /* 128MiB is the default value according to the manpage but we'll explicitly set it via the CLI */
   RAM   : ORIGIN = 0x40000000, LENGTH = 128M
 }
 

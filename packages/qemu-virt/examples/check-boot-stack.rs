@@ -1,5 +1,5 @@
 //! check that `.stack.boot` does indeed represent the call stack of the boot processor
-// runner: qemu-system-aarch64 -cpu cortex-a53 -machine virt -nographic -semihosting -kernel
+// runner: qemu-system-aarch64 -m 128 -cpu cortex-a53 -machine virt -nographic -semihosting -kernel
 
 #![no_std]
 #![no_main]
