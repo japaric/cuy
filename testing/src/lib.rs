@@ -42,35 +42,45 @@ fn snapshot_tests() -> io::Result<()> {
                 "CARGO_TARGET_{}_RUNNER",
                 TARGET.replace("-", "_").to_ascii_uppercase()
             );
-            let mut cargo = Command::new("cargo");
-            cargo.arg("run");
-            if cfg!(feature = "codecov") {
-                cargo.env("RUSTFLAGS", "-Cinstrument-coverage -Zno-profiler-runtime");
-                cargo.args(["--features", "codecov"]);
+            for release in [false, true] {
+                let mut cargo = Command::new("cargo");
+                cargo.arg("run");
+                if release {
+                    cargo.arg("--release");
+                }
+                if cfg!(feature = "codecov") {
+                    if release {
+                        continue;
+                    }
+
+                    cargo.env("RUSTFLAGS", "-Cinstrument-coverage -Zno-profiler-runtime");
+                    cargo.args(["--features", "codecov"]);
+                }
+                cargo.args([
+                    "-p",
+                    &pkg_name,
+                    "--example",
+                    example_name,
+                    "--target",
+                    TARGET,
+                ]);
+                eprintln!("$ {cargo:?}");
+                let output = cargo
+                    .env(&runner_key, &runner)
+                    .current_dir(root())
+                    .output()
+                    .expect("`cargo run` failed");
+
+                assert!(
+                    output.status.success(),
+                    "Cargo stderr: {}",
+                    String::from_utf8_lossy(&output.stderr)
+                );
+
+                let actual =
+                    String::from_utf8(output.stdout).expect("example's stdout is not UTF-8");
+                pretty_assertions::assert_eq!(expected, actual);
             }
-            cargo.args([
-                "-p",
-                &pkg_name,
-                "--example",
-                example_name,
-                "--target",
-                TARGET,
-            ]);
-            eprintln!("$ {cargo:?}");
-            let output = cargo
-                .env(runner_key, &runner)
-                .current_dir(root())
-                .output()
-                .expect("`cargo run` failed");
-
-            assert!(
-                output.status.success(),
-                "Cargo stderr: {}",
-                String::from_utf8_lossy(&output.stderr)
-            );
-
-            let actual = String::from_utf8(output.stdout).expect("example's stdout is not UTF-8");
-            pretty_assertions::assert_eq!(expected, actual);
         }
     }
 
