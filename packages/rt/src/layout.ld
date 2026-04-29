@@ -33,8 +33,10 @@ SECTIONS
   .stack (NOLOAD) : ALIGN(64)
   {
     _stack_lower = .;
-    /* TODO maybe make configurable; start with 4 KiB for the boot core */
-    . += 4K;
+    KEEP(*(.stack.boot));
+    . = ALIGN(64);
+    _boot_stack_higher = .;
+    *(.stack);
     _stack_higher = .;
   } >rw
 
@@ -47,3 +49,7 @@ SECTIONS
     *(.got);
   }
 }
+
+ASSERT(
+    _boot_stack_higher % 16 == 0,
+    "boot stack (initial SP value) is not 16-byte aligned as required by ISA");

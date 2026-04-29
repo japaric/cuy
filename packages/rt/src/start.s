@@ -17,7 +17,7 @@ is_secondary_core:
 
 is_boot_core:
   /* set up the stack pointer; without stack space nothing works */
-  ldr x0, =_stack_higher
+  ldr x0, =_boot_stack_higher
   mov SP, x0
 
   /* REQ001: allow FPU/SIMD in EL1; codecov uses these kind of registers */

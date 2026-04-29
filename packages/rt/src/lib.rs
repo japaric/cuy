@@ -13,11 +13,18 @@ use regs::{CurrentEL, DAIF, ELR_EL2, SPSR_EL2};
 #[macro_export]
 macro_rules! entry {
     ($path:path) => {
+        $crate::entry!($path, stack_size = 16 * 1024);
+    };
+    ($path:path, stack_size=$stack_size:expr) => {
         const _: () = {
             #[unsafe(export_name = "main")]
             extern "C" fn __implementation_detail__() -> ! {
                 ($path as fn() -> !)()
             }
+
+            #[unsafe(link_section = ".stack.boot")]
+            #[used]
+            static __BOOT_STACK: [u8; $stack_size] = [0; $stack_size];
         };
     };
 }
