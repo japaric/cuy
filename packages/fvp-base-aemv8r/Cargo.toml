@@ -1,0 +1,8 @@
+[package]
+name = "fvp-base-aemv8r"
+edition = "2024"
+
+[dev-dependencies]
+regs.path = "../regs"
+rt.path = "../rt"
+sh.path = "../sh"

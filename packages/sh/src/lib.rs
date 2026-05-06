@@ -5,7 +5,7 @@
 #![cfg_attr(feature = "codecov", coverage(off))]
 #![no_std]
 
-pub use semihosting::println;
+pub use semihosting::{eprintln, println};
 
 /// Exits the application
 pub fn exit() -> ! {

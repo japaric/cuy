@@ -1,3 +1,14 @@
+/* (NOLOAD) marks the *section* header as NOBITS but by default the section is */
+/* still mapped to a LOAD *program* header which the FVP will */
+/* zero-initialize instead of fill with a configurable byte pattern */
+/* the override the default section header to program header mapping we use */
+/* the custom program headers defined here */
+PHDRS
+{
+  load PT_LOAD;
+  noload PT_NULL;
+}
+
 SECTIONS
 {
   /* REQQ002 align sections to 64-byte boundaries for MPU compatibility [ARM-R64/D6.1.1] */
@@ -11,7 +22,7 @@ SECTIONS
     . = ALIGN(64);
     /* this simply creates a binding; it has no effect on the section itself */
     _text_higher = .;
-  } >ro
+  } >ro :load
 
   .rodata ALIGN(64) :
   {
@@ -19,7 +30,7 @@ SECTIONS
     *(.rodata.*);
     . = ALIGN(64);
     _rodata_higher = .;
-  } >ro
+  } >ro :load
 
   .data ALIGN(64) :
   {
@@ -27,7 +38,7 @@ SECTIONS
     *(.data.*);
     . = ALIGN(64);
     _data_higher = .;
-  } >rw
+  } >rw :load
 
   /* REQ000 */
   .bss (NOLOAD) : ALIGN(64)
@@ -36,7 +47,7 @@ SECTIONS
     *(.bss.*);
     . = ALIGN(64);
     _bss_higher = .;
-  } >rw
+  } >rw :noload
 
   .stack (NOLOAD) : ALIGN(64)
   {
@@ -47,7 +58,7 @@ SECTIONS
 
     *(.stack);
     _stack_higher = .;
-  } >rw
+  } >rw :noload
 
   /* discard non-debug sections unless there's a clear reason to */
   /* add them to the image */
