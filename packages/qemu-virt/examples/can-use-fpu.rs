@@ -1,5 +1,5 @@
 //! REQ001: check that the FPU can be used without raising an exception
-// runner: qemu-system-aarch64 -m 128 -cpu cortex-a53 -machine virt -nographic -semihosting -kernel
+// runner: $RUNNER_EL1
 
 #![no_std]
 #![no_main]

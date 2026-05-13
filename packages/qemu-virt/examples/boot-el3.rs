@@ -1,5 +1,5 @@
 //! check that the startup code can boot in EL3
-// runner: qemu-system-aarch64 -m 128 -cpu cortex-a53 -machine virt,secure=on -nographic -semihosting -kernel
+// runner: $RUNNER_EL3
 
 #![no_std]
 #![no_main]

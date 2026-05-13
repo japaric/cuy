@@ -1,5 +1,5 @@
 //! REQ000: check that the .bss section is zeroed by the startup code
-// runner: FVP_BaseR_AEMv8R -q -f FVP_BaseR_AEMv8R.cfg
+// runner: $RUNNER
 
 #![no_std]
 #![no_main]

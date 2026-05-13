@@ -1,5 +1,5 @@
 //! check that the .stack section is left unitialized by the ELF loader
-// runner: FVP_BaseR_AEMv8R -q -f FVP_BaseR_AEMv8R.cfg
+// runner: $RUNNER
 
 #![no_std]
 #![no_main]

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::Path;
 use std::process::Command;
 use std::{fs, io};
@@ -15,6 +16,7 @@ fn snapshot_tests() -> io::Result<()> {
         }
 
         let pkg_path = &entry.path();
+        let env_map = load_env_map(pkg_path);
         let examples_dir = pkg_path.join("examples");
         if !examples_dir.exists() {
             continue;
@@ -37,6 +39,7 @@ fn snapshot_tests() -> io::Result<()> {
             eprintln!("\nrun packages/{pkg_name}/examples/{example_name}");
             let expected = fs::read_to_string(path.with_extension("stdout")).unwrap_or_default();
             let Directives { runner } = &extract_directives(path)?;
+            let runner = shellexpand::env_with_context_no_errors(runner, |key| env_map.get(key));
 
             let runner_key = format!(
                 "CARGO_TARGET_{}_RUNNER",
@@ -66,7 +69,8 @@ fn snapshot_tests() -> io::Result<()> {
                 ]);
                 eprintln!("$ {cargo:?}");
                 let output = cargo
-                    .env(&runner_key, &runner)
+                    .envs(env_map.iter())
+                    .env(&runner_key, &*runner)
                     .current_dir(root())
                     .output()
                     .expect("`cargo run` failed");
@@ -124,4 +128,21 @@ fn root() -> &'static Path {
         .ancestors()
         .nth(1)
         .expect("project layout changed; this needs to be updated")
+}
+
+fn load_env_map(pkg_path: &Path) -> HashMap<String, String> {
+    let mut map = HashMap::new();
+
+    if let Ok(env_iter) = dotenvy::from_filename_iter(pkg_path.join(".env")) {
+        for res in env_iter {
+            if let Ok((k, v)) = res {
+                if k.starts_with('_') {
+                    continue;
+                }
+
+                map.insert(k, v);
+            }
+        }
+    }
+    map
 }
