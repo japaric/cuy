@@ -24,7 +24,7 @@ mkShell {
     qemu # `qemu-system-aarch64`
 
     # "You've met with a terrible fate, haven't you?"
-    # (I hope you won't need this)
+    # Optional (I hope you won't need this)
     gdb
   ];
 }

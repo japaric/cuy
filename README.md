@@ -10,7 +10,11 @@ For simplicity, this example is written such that tests can run on QEMU in syste
 
 ## Dependencies
 
-See `shell.nix`
+See `shell.nix` for the list of dependencies that a package manager can usually provide.
+
+Some tests run on the Arm's FVP_BaseR_AEMv8R (Fixed Virtual Platform Base R Architecture Envelope Model v8R). 
+The `FVP_BaseR_AEMv8R` binary is expected to be in `$PATH`.
+At time of writing the version used to run the tests was `[11.31.28 (Mar  1 2026)]`.
 
 ## Run tests
 
