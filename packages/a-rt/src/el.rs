@@ -1,6 +1,6 @@
 use core::arch::{asm, naked_asm};
 
-use regs::{CurrentEL, DAIF, ELR_EL2, SPSR_EL2};
+use a_regs::{CurrentEL, DAIF, ELR_EL2, SPSR_EL2};
 
 use crate::StackMemory;
 

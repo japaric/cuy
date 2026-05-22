@@ -6,9 +6,9 @@
 
 use core::sync::atomic::AtomicU8;
 
-use rt::LinkerSection;
+use a_rt::LinkerSection;
 
-rt::entry!(main);
+a_rt::entry!(main);
 
 static IN_DATA: AtomicU8 = AtomicU8::new(1);
 static IN_BSS: AtomicU8 = AtomicU8::new(0);

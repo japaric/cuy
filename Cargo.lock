@@ -3,12 +3,23 @@
 version = 4
 
 [[package]]
+name = "a-regs"
+version = "0.0.0"
+
+[[package]]
+name = "a-rt"
+version = "0.0.0"
+dependencies = [
+ "a-regs",
+]
+
+[[package]]
 name = "app"
 version = "0.0.0"
 dependencies = [
+ "a-regs",
+ "a-rt",
  "qemu-virt",
- "regs",
- "rt",
  "sh",
 ]
 
@@ -36,8 +47,8 @@ checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 name = "fvp-base-aemv8r"
 version = "0.0.0"
 dependencies = [
- "regs",
- "rt",
+ "a-regs",
+ "a-rt",
  "sh",
 ]
 
@@ -55,20 +66,9 @@ dependencies = [
 name = "qemu-virt"
 version = "0.0.0"
 dependencies = [
- "regs",
- "rt",
+ "a-regs",
+ "a-rt",
  "sh",
-]
-
-[[package]]
-name = "regs"
-version = "0.0.0"
-
-[[package]]
-name = "rt"
-version = "0.0.0"
-dependencies = [
- "regs",
 ]
 
 [[package]]

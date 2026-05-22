@@ -3,7 +3,7 @@ edition = "2024"
 name = "app"
 
 [dependencies]
-regs.path = "../regs"
-rt.path = "../rt"
+a-regs.path = "../a-regs"
+a-rt.path = "../a-rt"
 sh.path = "../sh"
 qemu-virt.path = "../qemu-virt"

@@ -4,10 +4,10 @@
 #![no_std]
 #![no_main]
 
-use regs::SP;
-use rt::LinkerSection;
+use a_regs::SP;
+use a_rt::LinkerSection;
 
-rt::entry!(main);
+a_rt::entry!(main);
 
 fn main() -> ! {
     let sp = SP::read();

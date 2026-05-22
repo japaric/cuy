@@ -6,7 +6,7 @@
 
 use core::sync::atomic::{self, AtomicU64};
 
-rt::entry!(main);
+a_rt::entry!(main);
 
 const EXPECTED: u64 = 1;
 static IN_DATA: AtomicU64 = AtomicU64::new(EXPECTED);

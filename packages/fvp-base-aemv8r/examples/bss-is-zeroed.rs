@@ -6,7 +6,7 @@
 
 use core::sync::atomic::AtomicU64;
 
-rt::entry!(main);
+a_rt::entry!(main);
 
 static IN_BSS: AtomicU64 = AtomicU64::new(0);
 

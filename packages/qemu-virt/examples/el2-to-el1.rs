@@ -5,10 +5,10 @@
 #![no_std]
 #![no_main]
 
-use regs::CurrentEL;
-use rt::stack_memory;
+use a_regs::CurrentEL;
+use a_rt::stack_memory;
 
-rt::entry!(main);
+a_rt::entry!(main);
 
 fn main() -> ! {
     assert_eq!(
@@ -17,7 +17,7 @@ fn main() -> ! {
         "this example must start in EL2"
     );
 
-    rt::drop_el(at_el1, stack_memory!(4 * 1024).unwrap());
+    a_rt::drop_el(at_el1, stack_memory!(4 * 1024).unwrap());
 }
 
 extern "C" fn at_el1() -> ! {

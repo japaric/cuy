@@ -1,6 +1,6 @@
 [package]
 edition = "2024"
-name = "rt"
+name = "a-rt"
 
 [dependencies]
-regs.path = "../regs"
+a-regs.path = "../a-regs"

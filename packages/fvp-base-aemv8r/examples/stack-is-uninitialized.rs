@@ -4,9 +4,9 @@
 #![no_std]
 #![no_main]
 
-use rt::stack_memory;
+use a_rt::stack_memory;
 
-rt::entry!(main);
+a_rt::entry!(main);
 
 // from `FVP_BaseR_AEMv8R --list-params`
 const FILL_PATTERN_1: u32 = 0xdfdfdfcf;

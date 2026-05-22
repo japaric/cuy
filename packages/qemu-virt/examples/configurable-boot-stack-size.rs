@@ -4,9 +4,9 @@
 #![no_std]
 #![no_main]
 
-use rt::LinkerSection;
+use a_rt::LinkerSection;
 
-rt::entry!(main, stack_size = 4 * 1024 - 1);
+a_rt::entry!(main, stack_size = 4 * 1024 - 1);
 
 const ALIGN: usize = 64;
 

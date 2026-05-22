@@ -4,9 +4,9 @@
 #![no_std]
 #![no_main]
 
-use regs::CurrentEL;
+use a_regs::CurrentEL;
 
-rt::entry!(main);
+a_rt::entry!(main);
 
 fn main() -> ! {
     assert_eq!(

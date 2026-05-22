@@ -3,6 +3,6 @@ name = "fvp-base-aemv8r"
 edition = "2024"
 
 [dev-dependencies]
-regs.path = "../regs"
-rt.path = "../rt"
+a-regs.path = "../a-regs"
+a-rt.path = "../a-rt"
 sh.path = "../sh"
