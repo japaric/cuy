@@ -1,5 +1,6 @@
 //! check that the startup code can boot in EL3
-// runner: $RUNNER_EL3
+//@ runner: $RUNNER_EL3
+//@ target: $TARGET
 
 #![no_std]
 #![no_main]

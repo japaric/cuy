@@ -1,0 +1,7 @@
+[package]
+name = "mps2-an386"
+edition = "2024"
+
+[dependencies]
+m-rt.path = "../m-rt"
+sh.path = "../sh"

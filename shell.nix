@@ -20,7 +20,7 @@ mkShell {
     # needed to link programs for the host
     gcc # `cc`
 
-    # needed to execute AArch64 programs
+    # needed to execute AArch64/Arm programs
     qemu # `qemu-system-aarch64`
 
     # "You've met with a terrible fate, haven't you?"

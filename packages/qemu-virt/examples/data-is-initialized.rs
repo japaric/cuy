@@ -1,5 +1,6 @@
 //! check that the .data section is initialized
-// runner: $RUNNER
+//@ runner: $RUNNER
+//@ target: $TARGET
 
 #![no_std]
 #![no_main]

@@ -1,6 +1,7 @@
 //! check that EL2 to EL1 transition works
 // FIXME does not work on earlier Cortex-A cores
-// runner: $RUNNER_EL2_NOKERNEL -cpu cortex-a76 -kernel
+//@ runner: $RUNNER_EL2_NOKERNEL -cpu cortex-a76 -kernel
+//@ target: $TARGET
 
 #![no_std]
 #![no_main]

@@ -1,5 +1,6 @@
 //! REQ001: check that the FPU can be used without raising an exception
-// runner: $RUNNER_EL1
+//@ runner: $RUNNER_EL1
+//@ target: $TARGET
 
 #![no_std]
 #![no_main]

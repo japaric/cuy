@@ -3,8 +3,6 @@ use std::path::Path;
 use std::process::Command;
 use std::{fs, io};
 
-const TARGET: &str = "aarch64-unknown-none";
-
 #[test]
 fn snapshot_tests() -> io::Result<()> {
     let packages_dir = root().join("packages");
@@ -38,15 +36,14 @@ fn snapshot_tests() -> io::Result<()> {
             let example_name = &path_stem(path);
             eprintln!("\nrun packages/{pkg_name}/examples/{example_name}");
             let expected = fs::read_to_string(path.with_extension("stdout")).unwrap_or_default();
-            let Directives { runner } = &extract_directives(path)?;
+            let Directives { runner, target } = &extract_directives(path)?;
             let runner = shellexpand::env_with_context_no_errors(runner, |key| env_map.get(key));
+            let target = shellexpand::env_with_context_no_errors(target, |key| env_map.get(key));
 
-            let runner_key = format!(
-                "CARGO_TARGET_{}_RUNNER",
-                TARGET.replace("-", "_").to_ascii_uppercase()
-            );
+            let runner_config = format!("target.'cfg(true)'.runner = '{runner}'",);
             for release in [false, true] {
                 let mut cargo = Command::new("cargo");
+                cargo.arg("--config").arg(&runner_config);
                 cargo.arg("run");
                 if release {
                     cargo.arg("--release");
@@ -65,12 +62,10 @@ fn snapshot_tests() -> io::Result<()> {
                     "--example",
                     example_name,
                     "--target",
-                    TARGET,
+                    &*target,
                 ]);
                 eprintln!("$ {cargo:?}");
                 let output = cargo
-                    .envs(env_map.iter())
-                    .env(&runner_key, &*runner)
                     .current_dir(root())
                     .output()
                     .expect("`cargo run` failed");
@@ -95,9 +90,10 @@ fn extract_directives(path: &Path) -> io::Result<Directives> {
     let contents = fs::read_to_string(path)?;
 
     let mut runner = None;
+    let mut target = None;
     for line in contents.lines() {
         let line = line.trim();
-        let Some(comment) = line.strip_prefix("//") else {
+        let Some(comment) = line.strip_prefix("//@") else {
             continue;
         };
 
@@ -105,15 +101,20 @@ fn extract_directives(path: &Path) -> io::Result<Directives> {
         if let Some(value) = comment.strip_prefix("runner:") {
             assert!(runner.is_none(), "runner specified more than once");
             runner = Some(value.trim().to_string());
+        } else if let Some(value) = comment.strip_prefix("target:") {
+            assert!(target.is_none(), "target specified more than once");
+            target = Some(value.trim().to_string());
         }
     }
 
     let runner = runner.expect("runner was not specified");
-    Ok(Directives { runner })
+    let target = target.expect("runner was not specified");
+    Ok(Directives { runner, target })
 }
 
 struct Directives {
     runner: String,
+    target: String,
 }
 
 fn path_stem(path: &Path) -> &str {

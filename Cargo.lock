@@ -53,6 +53,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "lm3s6965evb"
+version = "0.0.0"
+dependencies = [
+ "m-rt",
+ "sh",
+]
+
+[[package]]
+name = "m-rt"
+version = "0.1.0"
+
+[[package]]
 name = "minicov"
 version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -60,6 +72,22 @@ checksum = "4869b6a491569605d66d3952bcdf03df789e5b536e5f0cf7758a7f08a55ae24d"
 dependencies = [
  "cc",
  "walkdir",
+]
+
+[[package]]
+name = "mps2-an386"
+version = "0.0.0"
+dependencies = [
+ "m-rt",
+ "sh",
+]
+
+[[package]]
+name = "musca-a"
+version = "0.0.0"
+dependencies = [
+ "m-rt",
+ "sh",
 ]
 
 [[package]]

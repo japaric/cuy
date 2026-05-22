@@ -1,5 +1,6 @@
 //! check that `.stack.boot` does indeed represent the call stack of the boot processor
-// runner: $RUNNER
+//@ runner: $RUNNER
+//@ target: $TARGET
 
 #![no_std]
 #![no_main]

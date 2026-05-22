@@ -1,5 +1,6 @@
 //! REQ000: check that the .bss section is zeroed by the startup code
-// runner: $RUNNER
+//@ runner: $RUNNER
+//@ target: $TARGET
 
 #![no_std]
 #![no_main]

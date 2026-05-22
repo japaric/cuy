@@ -1,5 +1,6 @@
 //! check that the .stack section is left unitialized by the ELF loader
-// runner: $RUNNER
+//@ runner: $RUNNER
+//@ target: $TARGET
 
 #![no_std]
 #![no_main]

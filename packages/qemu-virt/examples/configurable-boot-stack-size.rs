@@ -1,5 +1,6 @@
 //! check that the configured boot stack size is respected
-// runner: $RUNNER
+//@ runner: $RUNNER
+//@ target: $TARGET
 
 #![no_std]
 #![no_main]

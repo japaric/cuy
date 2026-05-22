@@ -1,5 +1,6 @@
 //! check that the startup code can boot in EL2
-// runner: $RUNNER_EL2
+//@ runner: $RUNNER_EL2
+//@ target: $TARGET
 
 #![no_std]
 #![no_main]

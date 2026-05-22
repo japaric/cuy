@@ -1,5 +1,6 @@
 //! REQ002 check that the linker sections are 64-byte aligned
-// runner: $RUNNER
+//@ runner: $RUNNER
+//@ target: $TARGET
 
 #![no_std]
 #![no_main]

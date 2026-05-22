@@ -5,11 +5,8 @@ nightly-minicov := 'nightly-2025-12-04'
 nightly-fmt := 'nightly-2026-02-24'
 host := `rustc --print host-tuple`
 sysroot := `rustc --print sysroot`
-target := `grep 'target =' .cargo/config.toml | cut -d'"' -f2`
 
 llvmdir := sysroot + '/lib/rustlib/' + host + '/bin'
-releasedir := 'target/' + target + '/release/'
-disasmpath := releasedir + 'disasm'
 
 pre-commit-check:
   git diff --quiet || exit 1
@@ -30,28 +27,33 @@ fmt *ARGS:
 test:
   cargo t --target host-tuple -- --nocapture
 
-codecov:
-  rm -f *.profraw
-  rustup toolchain install {{nightly-minicov}} --profile minimal --target {{target}}
-  cd testing && cargo +{{nightly-minicov}} t --target host-tuple --features codecov -- --nocapture
-  grcov . -s . --binary-path ./target/{{target}}/debug -t html --branch --ignore-not-existing -o ./target/coverage/
-  rm -f *.profraw
-
 clippy:
-  cargo clippy --examples --workspace -- -D clippy::undocumented_unsafe_blocks -D warnings -D missing_docs
+  #!/usr/bin/env bash
+  set -euo pipefail
+  for pkg in `ls packages/`; do
+      [ -f packages/$pkg/.env ] || continue
+      pushd packages/$pkg
+      target=$(grep TARGET .env | cut -d '"' -f2)
+      cargo clippy --examples --target $target -- -D clippy::undocumented_unsafe_blocks -D warnings -D missing_docs
+      popd
+  done
+  # cargo ws exec cargo clippy --examples -- -D clippy::undocumented_unsafe_blocks -D warnings -D missing_docs
 
 # runs `llvm-nm` on the disasm application
-nm *ARGS: build-disasm
-  {{llvmdir}}/llvm-nm {{ARGS}} {{disasmpath}}
+nm TARGET *ARGS:
+  just build-disasm {{TARGET}}
+  {{llvmdir}}/llvm-nm {{ARGS}} target/{{TARGET}}/release/disasm
 
 # runs `llvm-objdump` on the disasm application
-objdump *ARGS: build-disasm
-  {{llvmdir}}/llvm-objdump {{ARGS}} {{disasmpath}}
+objdump TARGET *ARGS:
+  just build-disasm {{TARGET}}
+  {{llvmdir}}/llvm-objdump {{ARGS}} target/{{TARGET}}/release/disasm
 
 # runs `llvm-size` on the disasm application
-size *ARGS: build-disasm
-  {{llvmdir}}/llvm-size {{ARGS}} {{disasmpath}}
+size TARGET *ARGS:
+  just build-disasm {{TARGET}}
+  {{llvmdir}}/llvm-size {{ARGS}} target/{{TARGET}}/release/disasm
 
 [private]
-build-disasm:
-  cargo b -p disasm --release
+build-disasm TARGET:
+  cargo b -p disasm --target {{TARGET}} --release
