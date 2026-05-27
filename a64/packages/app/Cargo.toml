@@ -1,0 +1,10 @@
+[package]
+edition = "2024"
+name = "app"
+
+[dependencies]
+a64-regs.path = "../a64-regs"
+a64-rt.path = "../a64-rt"
+qemu-virt.path = "../qemu-virt"
+
+sh.workspace = true

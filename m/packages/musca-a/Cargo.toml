@@ -1,0 +1,8 @@
+[package]
+name = "musca-a"
+edition = "2024"
+
+[dependencies]
+m-rt.path = "../m-rt"
+
+sh.workspace = true

@@ -1,0 +1,9 @@
+[package]
+name = "qemu-virt"
+edition = "2024"
+
+[dev-dependencies]
+a64-regs.path = "../a64-regs"
+a64-rt.path = "../a64-rt"
+
+sh.workspace = true

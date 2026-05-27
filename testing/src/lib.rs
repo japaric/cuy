@@ -3,9 +3,10 @@ use std::path::Path;
 use std::process::Command;
 use std::{fs, io};
 
-#[test]
-fn snapshot_tests() -> io::Result<()> {
-    let packages_dir = root().join("packages");
+pub fn detect_and_run_tests(relpath: impl AsRef<Path>) -> io::Result<()> {
+    let relpath = relpath.as_ref();
+
+    let packages_dir = root().join(relpath);
     for entry in fs::read_dir(&packages_dir)? {
         let entry = entry?;
 
@@ -58,7 +59,7 @@ fn snapshot_tests() -> io::Result<()> {
                 }
                 cargo.args([
                     "-p",
-                    &pkg_name,
+                    pkg_name,
                     "--example",
                     example_name,
                     "--target",
@@ -66,7 +67,7 @@ fn snapshot_tests() -> io::Result<()> {
                 ]);
                 eprintln!("$ {cargo:?}");
                 let output = cargo
-                    .current_dir(root())
+                    .current_dir(pkg_path)
                     .output()
                     .expect("`cargo run` failed");
 

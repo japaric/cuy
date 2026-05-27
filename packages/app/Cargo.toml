@@ -1,9 +1,0 @@
-[package]
-edition = "2024"
-name = "app"
-
-[dependencies]
-a-regs.path = "../a-regs"
-a-rt.path = "../a-rt"
-sh.path = "../sh"
-qemu-virt.path = "../qemu-virt"

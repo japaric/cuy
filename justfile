@@ -19,7 +19,8 @@ setup:
 
 fmt *ARGS:
   rustup toolchain install {{nightly-fmt}} --profile minimal --component rustfmt
-  cargo +{{nightly-fmt}} fmt --all {{ARGS}}
+  cd a64 && cargo +{{nightly-fmt}} fmt --all {{ARGS}}
+  cd m && cargo +{{nightly-fmt}} fmt --all {{ARGS}}
   cd testing && cargo +{{nightly-fmt}} fmt --all {{ARGS}}
 
 # runs all test suites
@@ -30,29 +31,36 @@ test:
 clippy:
   #!/usr/bin/env bash
   set -euo pipefail
-  for pkg in `ls packages/`; do
-      [ -f packages/$pkg/.env ] || continue
-      pushd packages/$pkg
-      target=$(grep TARGET .env | cut -d '"' -f2)
-      cargo clippy --examples --target $target -- -D clippy::undocumented_unsafe_blocks -D warnings -D missing_docs
-      popd
+  profiles="a64 m"
+  for profile in ${profiles}; do
+    for pkg in `ls $profile/packages/`; do
+        [ -f $profile/packages/$pkg/.env ] || continue
+        pushd $profile/packages/$pkg
+        target=$(grep TARGET .env | cut -d '"' -f2)
+        cargo clippy --examples --target $target -- -D clippy::undocumented_unsafe_blocks -D warnings -D missing_docs
+        popd
+    done
   done
 
 # runs `llvm-nm` on the disasm application
+[working-directory: 'any/packages/disasm']
 nm TARGET *ARGS:
   just build-disasm {{TARGET}}
   {{llvmdir}}/llvm-nm {{ARGS}} target/{{TARGET}}/release/disasm
 
 # runs `llvm-objdump` on the disasm application
+[working-directory: 'any/packages/disasm']
 objdump TARGET *ARGS:
   just build-disasm {{TARGET}}
   {{llvmdir}}/llvm-objdump {{ARGS}} target/{{TARGET}}/release/disasm
 
 # runs `llvm-size` on the disasm application
+[working-directory: 'any/packages/disasm']
 size TARGET *ARGS:
   just build-disasm {{TARGET}}
   {{llvmdir}}/llvm-size {{ARGS}} target/{{TARGET}}/release/disasm
 
 [private]
+[working-directory: 'any/packages/disasm']
 build-disasm TARGET:
   cargo b -p disasm --target {{TARGET}} --release

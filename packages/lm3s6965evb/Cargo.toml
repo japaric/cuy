@@ -1,7 +1,0 @@
-[package]
-name = "lm3s6965evb"
-edition = "2024"
-
-[dependencies]
-m-rt.path = "../m-rt"
-sh.path = "../sh"
