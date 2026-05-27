@@ -24,9 +24,9 @@ fmt *ARGS:
   cd testing && cargo +{{nightly-fmt}} fmt --all {{ARGS}}
 
 # runs all test suites
-[working-directory: 'testing']
 test:
-  cargo t --target host-tuple -- --nocapture
+  cd testing && cargo t --target host-tuple -- --nocapture
+  cd any/packages/whoarchi && cargo t --target host-tuple
 
 clippy:
   #!/usr/bin/env bash
@@ -41,6 +41,7 @@ clippy:
         popd
     done
   done
+  cd any/packages/whoarchi && cargo clippy --target host-tuple -- -D clippy::undocumented_unsafe_blocks -D warnings -D missing_docs
 
 # runs `llvm-nm` on the disasm application
 [working-directory: 'any/packages/disasm']
@@ -59,6 +60,7 @@ objdump TARGET *ARGS:
 size TARGET *ARGS:
   just build-disasm {{TARGET}}
   {{llvmdir}}/llvm-size {{ARGS}} target/{{TARGET}}/release/disasm
+
 
 [private]
 [working-directory: 'any/packages/disasm']

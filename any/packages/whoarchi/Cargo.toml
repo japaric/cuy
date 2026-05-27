@@ -1,0 +1,7 @@
+[package]
+name = "whoarchi"
+edition = "2024"
+
+[dependencies]
+object = { version = "0.39.1", default-features = false, features = ["build_core", "elf"] }
+temp-dir = "0.2.0"
