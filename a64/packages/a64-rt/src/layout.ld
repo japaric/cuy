@@ -1,3 +1,6 @@
+/* default entry point for LLD but make it explicit */
+ENTRY(_start);
+
 /* (NOLOAD) marks the *section* header as NOBITS but by default the section is */
 /* still mapped to a LOAD *program* header which the FVP will */
 /* zero-initialize instead of fill with a configurable byte pattern */
@@ -6,7 +9,6 @@
 PHDRS
 {
   load PT_LOAD;
-  noload PT_NULL;
 }
 
 SECTIONS
@@ -47,7 +49,7 @@ SECTIONS
     *(.bss.*);
     . = ALIGN(64);
     _bss_higher = .;
-  } >rw :noload
+  } >rw :NONE
 
   .stack (NOLOAD) : ALIGN(64)
   {
@@ -58,7 +60,7 @@ SECTIONS
 
     *(.stack);
     _stack_higher = .;
-  } >rw :noload
+  } >rw :NONE
 
   /* discard non-debug sections unless there's a clear reason to */
   /* add them to the image */

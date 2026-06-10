@@ -1,0 +1,1 @@
+../../lm3s6965evb/examples/does-zero-bss.rs
