@@ -24,7 +24,7 @@ pub fn detect_and_run_tests(relpath: impl AsRef<Path>) -> io::Result<()> {
         let pkg_name = &path_stem(pkg_path);
         for entry in fs::read_dir(&examples_dir)? {
             let entry = entry?;
-            if !entry.file_type()?.is_file() {
+            if entry.file_type()?.is_dir() {
                 continue;
             }
 

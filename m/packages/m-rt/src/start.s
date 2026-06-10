@@ -15,5 +15,18 @@ _start:
   b    1b
 
 2:
+  /* REQ003: initialize the .data section */
+  /* NOTE: this assumes that the section LMA and VMA are 8-byte aligned */
+  ldr  r0, =_data_lma
+  ldr  r1, =_data_lower
+  ldr  r2, =_data_higher
+3:
+  cmp  r1, r2
+  bhs  4f
+  ldrd r3, r4, [r0], #8
+  strd r3, r4, [r1], #8
+  b    3b
+
+4:
   /* jump into the Rust part of the entry point */
   b rust_start

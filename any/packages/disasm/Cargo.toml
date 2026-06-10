@@ -1,3 +1,8 @@
 [package]
 name = "disasm"
 edition = "2024"
+
+[profile.release]
+lto = 'fat'
+opt-level = 'z'
+codegen-units = 1
