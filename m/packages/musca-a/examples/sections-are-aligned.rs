@@ -1,0 +1,1 @@
+../../lm3s6965evb/examples/sections-are-aligned.rs

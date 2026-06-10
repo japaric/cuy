@@ -4,6 +4,10 @@
 
 use core::arch::global_asm;
 
+pub use linker_section::LinkerSection;
+
+mod linker_section;
+
 /// Defines the user entry point of a program
 ///
 /// Optionally the size of the boot core call stack can be specified; the default value is 16 KiB.

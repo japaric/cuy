@@ -7,17 +7,27 @@ SECTIONS
   {
     _stack_higher = ORIGIN(rw) + LENGTH(rw);
 
+    _vectors_lower = .;
+
     LONG(_stack_higher);
     LONG(_start | 1); /* set thumb bit */
+
+    _vectors_higher = .;
   } > ro
 
   .text :
   {
+    _text_lower = .;
+
     *(.text.*);
+
+    _text_higher = .;
   } > ro
 
   .rodata :
   {
+    _rodata_lower = .;
+
     *(.rodata.*);
 
     /* align the end of this section to 8-byte boundary so */
@@ -59,11 +69,15 @@ SECTIONS
   }
 }
 
+/* REQ004: .vectors is 128-byte aligned */
 ASSERT(0 == ADDR(.vectors) % 128, "vector table must at least be 128-byte aligned");
 
+/* REQ005: .stack is 8-byte aligned */
 ASSERT(0 == _stack_higher % 8 && 0 == _stack_lower % 8, "stack is not 8-byte aligned");
 
+/* REQ006: .bss is 8-byte aligned */
 ASSERT(0 == _bss_lower % 8 && 0 == _bss_higher % 8, ".bss boundaries are not 8-byte aligned");
 
+/* REQ007: .data is 8-byte aligned */
 ASSERT(0 == _data_lma % 8, ".data LMA is not 8-byte aligned");
 ASSERT(0 == _data_lower % 8 && 0 == _data_higher % 8, ".data VMA boundaries are not 8-byte aligned");
