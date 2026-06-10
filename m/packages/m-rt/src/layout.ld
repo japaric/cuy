@@ -5,8 +5,6 @@ SECTIONS
 {
   .vectors :
   {
-    _stack_higher = ORIGIN(rw) + LENGTH(rw);
-
     _vectors_lower = .;
 
     LONG(_stack_higher);
@@ -36,6 +34,17 @@ SECTIONS
     _rodata_higher = .;
   } > ro
 
+  .stack (NOLOAD) :
+  {
+      ALIGN(8);
+      _stack_lower = .;
+
+      KEEP(*(.stack));
+
+      ALIGN(8);
+      _stack_higher = .;
+  } > rw
+
   _data_lma = _rodata_higher;
   .data : AT(_data_lma)
   {
@@ -57,7 +66,6 @@ SECTIONS
 
     . = ALIGN(8);
     _bss_higher = .;
-    _stack_lower = .;
   } > rw :NONE
 
   /* discard non-debug sections unless there's a clear reason to */
@@ -74,6 +82,7 @@ ASSERT(0 == ADDR(.vectors) % 128, "vector table must at least be 128-byte aligne
 
 /* REQ005: .stack is 8-byte aligned */
 ASSERT(0 == _stack_higher % 8 && 0 == _stack_lower % 8, "stack is not 8-byte aligned");
+ASSERT(_stack_lower != _stack_higher, ".stack section is empty");
 
 /* REQ006: .bss is 8-byte aligned */
 ASSERT(0 == _bss_lower % 8 && 0 == _bss_higher % 8, ".bss boundaries are not 8-byte aligned");
