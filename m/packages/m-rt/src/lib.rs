@@ -7,6 +7,7 @@ use core::arch::global_asm;
 pub use linker_section::LinkerSection;
 
 mod linker_section;
+pub mod vtor;
 
 /// Defines the user entry point of a program
 ///
@@ -39,6 +40,8 @@ extern "C" fn rust_start() -> ! {
     unsafe extern "C" {
         fn main() -> !;
     }
+
+    vtor::set();
 
     // SAFETY: signature is enforced by `entry!` macro
     unsafe { main() }

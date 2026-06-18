@@ -23,6 +23,9 @@ mkShell {
     # needed to execute AArch64/Arm programs
     qemu # `qemu-system-aarch64`
 
+    # rust-objdump and co.
+    cargo-binutils
+
     # "You've met with a terrible fate, haven't you?"
     # Optional (I hope you won't need this)
     gdb
