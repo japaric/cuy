@@ -3,13 +3,23 @@
 use core::sync::atomic;
 use core::sync::atomic::AtomicPtr;
 
+use mmio::RwReg;
+
+// Includes initial stack pointer entry
+const NUM_EXCEPTIONS: usize = 16;
+// FIXME other cores support more than 240 device interrupts
+pub(crate) const NUM_INTERRUPTS: usize = 240;
+
+const SCS: usize = 0xE000_ED00;
+// SAFETY: cross checked against TRM
+const SCS_VTOR: RwReg<SCS, usize> = unsafe { RwReg::new(0x8) };
+
 #[repr(C)]
 // for 256 entries we need 512-word alignment
 #[repr(align(2048))]
-// FIXME other cores support more than 240 device interrupts
 // TODO size should be configurable
 // 16 exceptions + 240 device interrupts (for Cortex-M3)
-struct Entries([AtomicPtr<()>; 256]);
+struct Entries([AtomicPtr<()>; NUM_EXCEPTIONS + NUM_INTERRUPTS]);
 
 static ENTRIES: Entries = Entries([const { AtomicPtr::new(unhandled as *mut ()) }; 256]);
 
@@ -20,10 +30,8 @@ extern "C" fn unhandled() -> ! {
 }
 
 pub(crate) fn set() {
-    const VTOR: *mut usize = 0xE000_ED08 as *mut usize;
-
     // SAFETY: alignment requirements are satisfied; entries are set
-    unsafe { VTOR.write_volatile(&raw const ENTRIES as usize) }
+    unsafe { SCS_VTOR.write(&raw const ENTRIES as usize) }
 }
 
 /// Signature of fault handler

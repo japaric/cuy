@@ -13,6 +13,13 @@ dependencies = [
 [[package]]
 name = "m-rt"
 version = "0.0.0"
+dependencies = [
+ "mmio",
+]
+
+[[package]]
+name = "mmio"
+version = "0.0.0"
 
 [[package]]
 name = "mps2-an386"

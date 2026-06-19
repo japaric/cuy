@@ -3,3 +3,4 @@ edition = "2024"
 name = "m-rt"
 
 [dependencies]
+mmio.path = "../../../any/packages/mmio"
