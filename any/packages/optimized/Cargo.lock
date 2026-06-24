@@ -3,42 +3,6 @@
 version = 4
 
 [[package]]
-name = "lm3s6965evb"
-version = "0.0.0"
-dependencies = [
- "m-rt",
- "sh",
-]
-
-[[package]]
-name = "m-rt"
-version = "0.0.0"
-dependencies = [
- "mmio",
- "optimized",
-]
-
-[[package]]
-name = "mmio"
-version = "0.0.0"
-
-[[package]]
-name = "mps2-an386"
-version = "0.0.0"
-dependencies = [
- "m-rt",
- "sh",
-]
-
-[[package]]
-name = "musca-a"
-version = "0.0.0"
-dependencies = [
- "m-rt",
- "sh",
-]
-
-[[package]]
 name = "optimized"
 version = "0.0.0"
 dependencies = [
@@ -64,19 +28,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfbc457d0c7a0759a614551b11a6409e5951f6c7537be1f1b7682b9ae9230368"
 dependencies = [
  "proc-macro2",
-]
-
-[[package]]
-name = "semihosting"
-version = "0.1.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8e4abf97879f4e80db69a9fba7bd64998e9bdad25f58ef045a778e191172fd4"
-
-[[package]]
-name = "sh"
-version = "0.0.0"
-dependencies = [
- "semihosting",
 ]
 
 [[package]]
