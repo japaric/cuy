@@ -4,4 +4,4 @@ name = "m-rt"
 
 [dependencies]
 mmio.path = "../../../any/packages/mmio"
-optimized.path = "../../../any/packages/optimized"
+optimize.path = "../../../any/packages/optimize"

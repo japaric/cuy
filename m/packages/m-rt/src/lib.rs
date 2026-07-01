@@ -59,7 +59,7 @@ _start:
 /// - `lower..higher` must be the boundaries of a linker section that needs runtime zeroing, like
 /// `.bss`
 /// - this function must be called before any Rust code is called
-#[optimized::optimized]
+#[optimize::size]
 unsafe extern "C" fn zero_bss(lower: *mut u64, higher: *mut u64) {
     let mut curr = lower;
     while curr < higher {
@@ -76,7 +76,7 @@ unsafe extern "C" fn zero_bss(lower: *mut u64, higher: *mut u64) {
 ///   initialization, like `.data`
 /// - `lma..(lma+(higher-lower))` must point to the LMA boundaries of said section
 /// - this function must be called before any Rust code is called
-#[optimized::optimized]
+#[optimize::size]
 unsafe extern "C" fn init_data(lma: *const u64, lower: *mut u64, higher: *mut u64) {
     let mut from = lma;
     let mut to = lower;

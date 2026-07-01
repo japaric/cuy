@@ -15,7 +15,7 @@ name = "m-rt"
 version = "0.0.0"
 dependencies = [
  "mmio",
- "optimized",
+ "optimize",
 ]
 
 [[package]]
@@ -39,7 +39,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "optimized"
+name = "optimize"
 version = "0.0.0"
 dependencies = [
  "proc-macro2",

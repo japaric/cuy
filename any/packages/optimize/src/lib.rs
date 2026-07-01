@@ -10,8 +10,15 @@ use quote::quote;
 use syn::{ItemFn, LitStr, Signature, parse_macro_input};
 use temp_dir::TempDir;
 
+/// Optimizes the function in a separate crate for size and then replaces it with
+/// the optimized assembly
+///
+/// # Limitations
+/// - the function must use the `extern "C"` ABI
+/// - the function cannot use any API outside of the `core` crate
+/// - the function cannot rely on import *outside* of it; imports must be placed inside the function
 #[proc_macro_attribute]
-pub fn optimized(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn size(attr: TokenStream, item: TokenStream) -> TokenStream {
     assert!(attr.is_empty(), "`#[optimized]` takes no parameters");
     let item_fn = parse_macro_input!(item as ItemFn);
     validate_item(&item_fn);
