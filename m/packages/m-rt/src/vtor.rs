@@ -45,9 +45,9 @@ pub type ExceptionHandler = extern "C" fn();
 #[non_exhaustive]
 pub enum NonMaskableFault {
     /// The NonMaskable Interrupt
-    Nmi = 2,
+    NonMaskableInt = -14,
     /// Hard Fault exception
-    HardFault = 3,
+    HardFault = -13,
 }
 
 impl NonMaskableFault {
@@ -58,7 +58,8 @@ impl NonMaskableFault {
     /// These faults cannot be masked so they'll break critical sections based on disabling/masking
     /// interrupts; the handler must be careful when accessing shared memory, e.g. static variables
     pub unsafe fn set_handler(&self, f: FaultHandler) {
-        ENTRIES.0[*self as usize].store(f as *mut (), atomic::Ordering::Relaxed);
+        ENTRIES.0[(NUM_EXCEPTIONS as isize + *self as isize) as usize]
+            .store(f as *mut (), atomic::Ordering::Relaxed);
     }
 }
 
@@ -67,17 +68,20 @@ impl NonMaskableFault {
 #[non_exhaustive]
 pub enum Fault {
     /// Memory Management fault
-    MemManage = 4,
+    MemoryManagement = -12,
     /// Bus fault
-    BusFault = 5,
+    BusFault = -11,
     /// Usage fault
-    UsageFault = 6,
+    UsageFault = -10,
+    /// Secure fault
+    SecureFault = -9,
 }
 
 impl Fault {
     /// Sets a handler for this maskable fault
     pub fn set_handler(&self, f: FaultHandler) {
-        ENTRIES.0[*self as usize].store(f as *mut (), atomic::Ordering::Relaxed);
+        ENTRIES.0[(NUM_EXCEPTIONS as isize + *self as isize) as usize]
+            .store(f as *mut (), atomic::Ordering::Relaxed);
     }
 }
 
@@ -86,17 +90,20 @@ impl Fault {
 #[non_exhaustive]
 pub enum Exception {
     /// SuperVisor Call exception
-    SVCall = 11,
+    SVCall = -5,
+    /// SuperVisor Call exception
+    DebugMonitor = -4,
     /// PendSV exception
-    PendSV = 14,
+    PendSV = -2,
     /// System timer exception
-    SysTick = 15,
+    SysTick = -1,
 }
 
 impl Exception {
     /// Sets a handler for this exception
     pub fn set_handler(&self, f: ExceptionHandler) {
-        ENTRIES.0[*self as usize].store(f as *mut (), atomic::Ordering::Relaxed);
+        ENTRIES.0[(NUM_EXCEPTIONS as isize + *self as isize) as usize]
+            .store(f as *mut (), atomic::Ordering::Relaxed);
     }
 }
 
