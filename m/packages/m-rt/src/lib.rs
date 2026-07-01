@@ -6,4 +6,5 @@ pub use linker_section::LinkerSection;
 
 mod entry;
 mod linker_section;
+pub mod stack;
 pub mod vtor;

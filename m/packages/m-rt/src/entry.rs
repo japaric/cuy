@@ -1,6 +1,6 @@
 use core::arch::global_asm;
 
-use crate::vtor;
+use crate::{stack, vtor};
 
 /// Defines the user entry point of a program
 ///
@@ -25,8 +25,6 @@ macro_rules! entry {
         };
     };
 }
-
-const STACK_COLOR: u32 = 0x90a9_59ff;
 
 global_asm!("
   .section .text._start
@@ -61,7 +59,7 @@ _start:
   /* jump into the Rust part of the entry point */
   b {rust_start}
 ",
-            stack_color = const STACK_COLOR,
+            stack_color = const stack::COLOR,
             zero_bss = sym zero_bss,
             init_data = sym init_data,
             rust_start = sym rust_start,

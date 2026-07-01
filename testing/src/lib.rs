@@ -58,6 +58,7 @@ pub fn detect_and_run_tests(relpath: impl AsRef<Path>) -> io::Result<()> {
                     cargo.args(["--features", "codecov"]);
                 }
                 cargo.args([
+                    "-q",
                     "-p",
                     pkg_name,
                     "--example",
@@ -76,6 +77,12 @@ pub fn detect_and_run_tests(relpath: impl AsRef<Path>) -> io::Result<()> {
                     "Cargo stderr: {}",
                     String::from_utf8_lossy(&output.stderr)
                 );
+
+                let stderr = String::from_utf8_lossy(&output.stderr);
+                let stderr = stderr.trim();
+                if !stderr.is_empty() {
+                    eprintln!("{stderr}");
+                }
 
                 let actual =
                     String::from_utf8(output.stdout).expect("example's stdout is not UTF-8");

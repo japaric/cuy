@@ -9,11 +9,6 @@ sh.path = "../any/packages/sh"
 license = "MIT OR Apache-2.0"
 publish = false
 
-[profile.dev]
-codegen-units = 1
-lto = 'fat'
-opt-level = 'z'
-
 [profile.release]
 codegen-units = 1
 debug = true
