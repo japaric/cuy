@@ -26,10 +26,25 @@ macro_rules! entry {
     };
 }
 
+const STACK_COLOR: u32 = 0x90a9_59ff;
+
 global_asm!("
   .section .text._start
   .global _start
 _start:
+  /* REQ008: paint stack on startup */
+  /* cannot do this with `#[optimize::size]` because the output assembly pushes/pops the stack and
+     this writes to the stack */
+  ldr r0, =_stack_lower
+  ldr r1, =_stack_higher
+  ldr r2, ={stack_color}
+1:
+  cmp r0, r1
+  bhs 2f
+  stm r0!, {{r2}}
+  b   1b
+2:
+
   /* REQ000: zero bss */
   /* NOTE: this assumes the section is 8-byte aligned (REQ006) */
   ldr r0, =_bss_lower
@@ -45,7 +60,12 @@ _start:
 
   /* jump into the Rust part of the entry point */
   b {rust_start}
-", zero_bss = sym zero_bss, init_data = sym init_data, rust_start = sym rust_start);
+",
+            stack_color = const STACK_COLOR,
+            zero_bss = sym zero_bss,
+            init_data = sym init_data,
+            rust_start = sym rust_start,
+);
 
 /// # Safety
 /// - `lower..higher` must be the boundaries of a linker section that needs runtime zeroing, like

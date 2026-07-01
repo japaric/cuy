@@ -6,20 +6,15 @@
 use core::panic::PanicInfo;
 
 #[unsafe(no_mangle)]
-fn _start(lma: *const u64, vma_lower: *mut u64, vma_higher: *mut u64) -> ! {
-    let mut from = lma;
-    let mut to = vma_lower;
-    while to < vma_higher {
+extern "C" fn _start(lower: *mut u32, higher: *mut u32, color: u32) {
+    let mut curr = lower;
+    while curr < higher {
         unsafe {
-            let value = from.read_volatile();
-            to.write_volatile(value);
+            curr.write_volatile(color);
 
-            from = from.add(1);
-            to = to.add(1);
+            curr = curr.add(1);
         }
     }
-
-    loop {}
 }
 
 #[panic_handler]

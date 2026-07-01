@@ -26,8 +26,8 @@ fmt *ARGS:
 
 # runs all test suites
 test *ARGS:
-  cd testing && cargo t --target host-tuple -- --nocapture
-  cd any/packages/whoarchi && cargo t --target host-tuple -- {{ARGS}}
+  cd testing && cargo t --target host-tuple -- {{ARGS}} --nocapture
+  cd any/packages/whoarchi && cargo t --target host-tuple
 
 clippy:
   #!/usr/bin/env bash
