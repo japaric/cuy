@@ -7,6 +7,7 @@ host := `rustc --print host-tuple`
 sysroot := `rustc --print sysroot`
 
 llvmdir := sysroot + '/lib/rustlib/' + host + '/bin'
+clippy_flags := '-D clippy::undocumented_unsafe_blocks -D clippy::missing_safety_doc -D warnings -D missing_docs'
 
 pre-commit-check:
   git diff --quiet || exit 1
@@ -24,9 +25,9 @@ fmt *ARGS:
   cd testing && cargo +{{nightly-fmt}} fmt --all {{ARGS}}
 
 # runs all test suites
-test:
+test *ARGS:
   cd testing && cargo t --target host-tuple -- --nocapture
-  cd any/packages/whoarchi && cargo t --target host-tuple
+  cd any/packages/whoarchi && cargo t --target host-tuple -- {{ARGS}}
 
 clippy:
   #!/usr/bin/env bash
@@ -37,11 +38,11 @@ clippy:
         [ -f $profile/packages/$pkg/.env ] || continue
         pushd $profile/packages/$pkg
         target=$(grep TARGET .env | cut -d '"' -f2)
-        cargo clippy --examples --target $target -- -D clippy::undocumented_unsafe_blocks -D warnings -D missing_docs
+        cargo clippy --examples --target $target -- {{clippy_flags}}
         popd
     done
   done
-  cd any/packages/whoarchi && cargo clippy --target host-tuple -- -D clippy::undocumented_unsafe_blocks -D warnings -D missing_docs
+  cd any/packages/whoarchi && cargo clippy --target host-tuple -- {{clippy_flags}}
 
 # runs `llvm-nm` on the disasm application
 [working-directory: 'any/packages/disasm']

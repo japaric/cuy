@@ -26,9 +26,16 @@ pub fn optimized(attr: TokenStream, item: TokenStream) -> TokenStream {
         attrs,
         vis,
         sig,
-        block: _,
+        block,
     } = &item_fn;
     quote!(
+        // emit the source code so we can lint it
+        const _: () = {
+            #vis #sig {
+                #block
+            }
+        };
+
         #(#attrs)*
         #[unsafe(naked)]
         #vis #sig {
