@@ -34,6 +34,51 @@ pub(crate) fn set() {
     unsafe { SCS_VTOR.write(&raw const ENTRIES as usize) }
 }
 
+/// A function that can be used as an exception handler
+///
+/// # Safety
+/// Must not be implemented manually; use the `exception_handler_with_stacked_registers!` macro or
+/// use a function pointer with type `extern "C" fn()`
+pub unsafe trait ExceptionHandler {
+    #[doc(hidden)]
+    fn address(self) -> usize;
+}
+
+/// Safety: matches the ABI expected by the ISA
+unsafe impl ExceptionHandler for extern "C" fn() {
+    fn address(self) -> usize {
+        self as usize
+    }
+}
+
+/// Returns an `ExceptionHandler` implementation
+///
+/// Takes a path to a function with signature `extern "C" fn(&StackedRegisters)`. The
+/// function will have access to the registers pushed onto the stack on exception entry
+#[macro_export]
+macro_rules! exception_handler_with_stacked_registers {
+    ($path:path) => {{
+        struct S;
+        // function signature validation
+        const _: extern "C" fn(&$crate::vtor::StackedRegisters) = $path;
+        unsafe impl $crate::vtor::ExceptionHandler for S {
+            fn address(self) -> usize {
+                #[unsafe(naked)]
+                extern "C" fn trampoline() {
+                    core::arch::naked_asm!(
+                        "mov r0, sp
+b {}",
+                        sym $path
+                    )
+                }
+
+                trampoline as usize
+            }
+        }
+        S
+    }};
+}
+
 /// A function that can be used as a fault handler
 ///
 /// # Safety
@@ -42,6 +87,13 @@ pub(crate) fn set() {
 pub unsafe trait FaultHandler {
     #[doc(hidden)]
     fn address(self) -> usize;
+}
+
+/// Safety: matches the ABI expected by the ISA
+unsafe impl FaultHandler for extern "C" fn() -> ! {
+    fn address(self) -> usize {
+        self as usize
+    }
 }
 
 /// Returns a `FaultHandler` implementation
@@ -74,6 +126,7 @@ b {}",
 
 /// Registers pushed onto the stack on exception entry
 #[repr(C)]
+#[non_exhaustive]
 pub struct StackedRegisters {
     /// Processor register 0
     pub r0: usize,
@@ -94,16 +147,6 @@ pub struct StackedRegisters {
     /// Program Status Register
     pub xpsr: usize,
 }
-
-/// Safety: matches the ABI expected by the ISA
-unsafe impl FaultHandler for extern "C" fn() -> ! {
-    fn address(self) -> usize {
-        self as usize
-    }
-}
-
-/// Signature of exception handler
-pub type ExceptionHandler = extern "C" fn();
 
 /// Fault exceptions that cannot be masked, e.g. using CPSID or BASEPRI
 #[derive(Clone, Copy)]
@@ -166,9 +209,9 @@ pub enum Exception {
 
 impl Exception {
     /// Sets a handler for this exception
-    pub fn set_handler(&self, f: ExceptionHandler) {
+    pub fn set_handler(&self, f: impl ExceptionHandler) {
         ENTRIES.0[(NUM_EXCEPTIONS as isize + *self as isize) as usize]
-            .store(f as *mut (), atomic::Ordering::Relaxed);
+            .store(f.address() as *mut (), atomic::Ordering::Relaxed);
     }
 }
 
