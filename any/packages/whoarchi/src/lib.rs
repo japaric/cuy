@@ -19,7 +19,7 @@ use object::read::{Object as _, ObjectSection as _};
 use temp_dir::TempDir;
 
 /// Identifies the given compilation `target`
-pub fn whoarchi(target: &str) -> Result<WhoArchI, Error> {
+pub fn id_target(target: &str) -> Result<WhoArchI, Error> {
     let rustc = env::var_os("RUSTC").unwrap_or_else(|| OsString::from("rustc"));
 
     let temp_dir = TempDir::new()?;
@@ -45,9 +45,13 @@ pub fn whoarchi(target: &str) -> Result<WhoArchI, Error> {
 
     let probe_o = temp_dir.join("probe.o");
     let bytes = fs::read(probe_o)?;
+    id_binary(&bytes)
+}
 
+/// Identifies the given binary
+pub fn id_binary(bytes: &[u8]) -> Result<WhoArchI, Error> {
     let mut aeabi = None;
-    if let Ok(file) = ElfFile32::<Endianness>::parse(&*bytes) {
+    if let Ok(file) = ElfFile32::<Endianness>::parse(bytes) {
         let endian = file.endian();
         for section in file.sections() {
             let sh_type = section.elf_section_header().sh_type(endian);
@@ -496,7 +500,7 @@ mod tests {
         ];
 
         for (target, expected) in cases {
-            let got = crate::whoarchi(target)
+            let got = crate::id_target(target)
                 .unwrap_or_else(|e| panic!("could not identify {target} due to {e:?}"));
             assert_eq!(expected, got, "{target}")
         }

@@ -5,3 +5,6 @@ name = "m-rt"
 [dependencies]
 mmio.path = "../../../any/packages/mmio"
 optimize.path = "../../../any/packages/optimize"
+
+[build-dependencies]
+whoarchi.path = "../../../any/packages/whoarchi"
