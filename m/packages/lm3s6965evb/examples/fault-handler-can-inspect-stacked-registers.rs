@@ -8,7 +8,7 @@
 use core::arch::asm;
 
 use m_rt::fault_handler_with_stacked_registers;
-use m_rt::vtor::{NonMaskableFault, StackedRegisters};
+use m_rt::vtor::{NonMaskableFault, StackedRegisters, VectActive};
 
 m_rt::entry!(main);
 
@@ -28,6 +28,10 @@ fn main() -> ! {
 extern "C" fn handler(state: &StackedRegisters) -> ! {
     const UDF_0: u16 = 0xde00;
 
+    assert_eq!(
+        VectActive::NonMaskableFault(NonMaskableFault::HardFault),
+        VectActive::get()
+    );
     assert_eq!(0, state.r0);
     assert_eq!(1, state.r1);
     assert_eq!(2, state.r2);

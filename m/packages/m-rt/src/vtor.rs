@@ -3,7 +3,7 @@
 use core::sync::atomic;
 use core::sync::atomic::AtomicPtr;
 
-use mmio::RwReg;
+use mmio::{RwReg, SafeRoReg};
 
 // Includes initial stack pointer entry
 const NUM_EXCEPTIONS: usize = 16;
@@ -11,6 +11,8 @@ const NUM_EXCEPTIONS: usize = 16;
 pub(crate) const NUM_INTERRUPTS: usize = 240;
 
 const SCS: usize = 0xE000_ED00;
+// SAFETY: cross checked against TRM
+const SCS_ICSR: SafeRoReg<SCS, usize> = unsafe { SafeRoReg::new(0x4) };
 // SAFETY: cross checked against TRM
 const SCS_VTOR: RwReg<SCS, usize> = unsafe { RwReg::new(0x8) };
 
@@ -23,10 +25,58 @@ struct Entries([AtomicPtr<()>; NUM_EXCEPTIONS + NUM_INTERRUPTS]);
 
 static ENTRIES: Entries = Entries([const { AtomicPtr::new(unhandled as *mut ()) }; 256]);
 
-// TODO report exception number
-// TODO report stacked registers
+/// The current executing exception
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum VectActive {
+    /// Thread mode
+    ThreadMode,
+    /// Non-maskable fault
+    NonMaskableFault(NonMaskableFault),
+    /// Maskable fault
+    Fault(Fault),
+    /// System interrupt
+    SystemInterrupt(SystemInterrupt),
+    /// External interrupt
+    ExternalInterrupt(u16),
+    /// Reserved exception number
+    Reserved(u8),
+}
+
+impl VectActive {
+    /// Returns `VectActive`
+    pub fn get() -> Self {
+        match SCS_ICSR.read() & ((1 << 9) - 1) {
+            0 => Self::ThreadMode,
+            2 => Self::NonMaskableFault(NonMaskableFault::NonMaskableInt),
+            3 => Self::NonMaskableFault(NonMaskableFault::HardFault),
+            4 => Self::Fault(Fault::MemoryManagement),
+            5 => Self::Fault(Fault::BusFault),
+            6 => Self::Fault(Fault::UsageFault),
+            7 => Self::Fault(Fault::SecureFault),
+            11 => Self::SystemInterrupt(SystemInterrupt::SVCall),
+            12 => Self::Fault(Fault::DebugMonitor),
+            14 => Self::SystemInterrupt(SystemInterrupt::PendSV),
+            15 => Self::SystemInterrupt(SystemInterrupt::SysTick),
+            reserved if reserved < 16 => Self::Reserved(reserved as u8),
+            interrupt => Self::ExternalInterrupt((interrupt.wrapping_sub(16)) as u16),
+        }
+    }
+}
+
+#[unsafe(naked)]
 extern "C" fn unhandled() -> ! {
-    panic!("unhandled exception")
+    extern "C" fn handler(context: &StackedRegisters) -> ! {
+        panic!(
+            "unhandled exception {:?}; context: {context:#?}",
+            VectActive::get()
+        )
+    }
+
+    core::arch::naked_asm!(
+        "mov r0, sp
+    b {}",
+        sym handler
+    )
 }
 
 pub(crate) fn set() {
@@ -126,7 +176,9 @@ b {}",
 
 /// Registers pushed onto the stack on exception entry
 #[repr(C)]
+// TODO FPU registers (which are lazily stacked)
 #[non_exhaustive]
+#[derive(Debug)]
 pub struct StackedRegisters {
     /// Processor register 0
     pub r0: usize,
@@ -149,7 +201,7 @@ pub struct StackedRegisters {
 }
 
 /// Fault exceptions that cannot be masked, e.g. using CPSID or BASEPRI
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 #[non_exhaustive]
 pub enum NonMaskableFault {
     /// The NonMaskable Interrupt
@@ -172,7 +224,7 @@ impl NonMaskableFault {
 }
 
 /// Fault exceptions that can be masked, e.g. using CPSID or BASEPRI
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 #[non_exhaustive]
 pub enum Fault {
     /// Memory Management fault
@@ -183,6 +235,8 @@ pub enum Fault {
     UsageFault = -10,
     /// Secure fault
     SecureFault = -9,
+    /// DebugMonitor exception
+    DebugMonitor = -4,
 }
 
 impl Fault {
@@ -194,20 +248,18 @@ impl Fault {
 }
 
 /// Non-fault exceptions
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 #[non_exhaustive]
-pub enum Exception {
+pub enum SystemInterrupt {
     /// SuperVisor Call exception
     SVCall = -5,
-    /// SuperVisor Call exception
-    DebugMonitor = -4,
     /// PendSV exception
     PendSV = -2,
     /// System timer exception
     SysTick = -1,
 }
 
-impl Exception {
+impl SystemInterrupt {
     /// Sets a handler for this exception
     pub fn set_handler(&self, f: impl ExceptionHandler) {
         ENTRIES.0[(NUM_EXCEPTIONS as isize + *self as isize) as usize]
