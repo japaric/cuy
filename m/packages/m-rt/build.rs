@@ -9,6 +9,7 @@ use std::path::Path;
 use whoarchi::{CPU_arch, CPU_arch_profile};
 
 fn main() -> Result<(), Box<dyn Error>> {
+    println!("cargo::rustc-check-cfg=cfg(v8m_mainline)");
     check_compilation_target()?;
     provide_linker_script_to_downstream()?;
 
@@ -29,7 +30,10 @@ fn check_compilation_target() -> Result<(), Box<dyn Error>> {
     );
     match aeabi.cpu_arch() {
         // OK
-        CPU_arch::v7 | CPU_arch::v7E_M | CPU_arch::v8_M_mainline => {}
+        CPU_arch::v7 | CPU_arch::v7E_M => {}
+        CPU_arch::v8_M_mainline => {
+            println!("cargo::rustc-cfg=v8m_mainline");
+        }
 
         CPU_arch::v6S_M => panic!("Armv6-M does not support VTOR; this CPU is not supported"),
         CPU_arch::v8_M_baseline => {

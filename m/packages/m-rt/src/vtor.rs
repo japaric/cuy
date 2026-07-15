@@ -1,29 +1,24 @@
 //! Vector table manipulation
 
+use core::fmt;
 use core::sync::atomic;
 use core::sync::atomic::AtomicPtr;
 
-use mmio::{RwReg, SafeRoReg};
+use crate::scs;
 
 // Includes initial stack pointer entry
 const NUM_EXCEPTIONS: usize = 16;
-// FIXME other cores support more than 240 device interrupts
-pub(crate) const NUM_INTERRUPTS: usize = 240;
-
-const SCS: usize = 0xE000_ED00;
-// SAFETY: cross checked against TRM
-const SCS_ICSR: SafeRoReg<SCS, usize> = unsafe { SafeRoReg::new(0x4) };
-// SAFETY: cross checked against TRM
-const SCS_VTOR: RwReg<SCS, usize> = unsafe { RwReg::new(0x8) };
+pub(crate) const NUM_INTERRUPTS: usize = 496;
 
 #[repr(C)]
-// for 256 entries we need 512-word alignment
+// for 512 entries we need 2048-byte alignment
 #[repr(align(2048))]
 // TODO size should be configurable
-// 16 exceptions + 240 device interrupts (for Cortex-M3)
+// 16 exceptions + 496 device interrupts (for v8M.mainline)
 struct Entries([AtomicPtr<()>; NUM_EXCEPTIONS + NUM_INTERRUPTS]);
 
-static ENTRIES: Entries = Entries([const { AtomicPtr::new(unhandled as *mut ()) }; 256]);
+static ENTRIES: Entries =
+    Entries([const { AtomicPtr::new(unhandled as *mut ()) }; NUM_EXCEPTIONS + NUM_INTERRUPTS]);
 
 /// The current executing exception
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -45,7 +40,7 @@ pub enum VectActive {
 impl VectActive {
     /// Returns `VectActive`
     pub fn get() -> Self {
-        match SCS_ICSR.read() & ((1 << 9) - 1) {
+        match scs::ICSR.read() & ((1 << 9) - 1) {
             0 => Self::ThreadMode,
             2 => Self::NonMaskableFault(NonMaskableFault::NonMaskableInt),
             3 => Self::NonMaskableFault(NonMaskableFault::HardFault),
@@ -81,7 +76,7 @@ extern "C" fn unhandled() -> ! {
 
 pub(crate) fn set() {
     // SAFETY: alignment requirements are satisfied; entries are set
-    unsafe { SCS_VTOR.write(&raw const ENTRIES as usize) }
+    unsafe { scs::VTOR.write(&raw const ENTRIES as usize) }
 }
 
 /// A function that can be used as an exception handler
@@ -267,4 +262,37 @@ impl SystemInterrupt {
     }
 }
 
-// TODO API to set interrupt handler
+/// an external interrupt
+#[derive(Clone, Copy)]
+pub struct ExternalInterrupt {
+    pub(crate) nr: u16,
+}
+
+/// creates an external interrupt
+///
+/// # Panics
+/// - if `nr` exceeds the maximum number of interrupts supported by the ISA
+#[allow(non_snake_case)]
+pub fn ExternalInterrupt(nr: u16) -> ExternalInterrupt {
+    assert!(usize::from(nr) < NUM_INTERRUPTS);
+    ExternalInterrupt { nr }
+}
+
+impl ExternalInterrupt {
+    pub(crate) fn set_handler(&self, f: extern "C" fn()) {
+        ENTRIES.0[NUM_EXCEPTIONS + usize::from(self.nr)]
+            .store(f as *mut (), atomic::Ordering::Relaxed);
+    }
+}
+
+impl fmt::Debug for ExternalInterrupt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("ExternalInterrupt").field(&self.nr).finish()
+    }
+}
+
+impl From<ExternalInterrupt> for u16 {
+    fn from(value: ExternalInterrupt) -> Self {
+        value.nr
+    }
+}
