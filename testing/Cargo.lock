@@ -25,6 +25,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "running-wheel"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8cc64581dc2fae515199a766ec451e10921894ab39a355d0d601a2a518cc55be"
+dependencies = [
+ "dotenvy",
+ "pretty_assertions",
+ "shellexpand",
+]
+
+[[package]]
 name = "shellexpand"
 version = "3.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -34,9 +45,7 @@ checksum = "32824fab5e16e6c4d86dc1ba84489390419a39f97699852b66480bb87d297ed8"
 name = "testing"
 version = "0.0.0"
 dependencies = [
- "dotenvy",
- "pretty_assertions",
- "shellexpand",
+ "running-wheel",
 ]
 
 [[package]]

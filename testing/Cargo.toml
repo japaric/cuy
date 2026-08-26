@@ -7,12 +7,7 @@ publish = false
 doctest = false
 
 [dependencies]
-dotenvy = "0.15.7"
-pretty_assertions = "1.4.1"
-shellexpand = { version = "3.1.2", default-features = false, features = ["base-0"] }
-
-[features]
-codecov = []
+running-wheel = "0.1.0"
 
 [workspace]
 # this should not be cross compiled so put it ins own workspace
