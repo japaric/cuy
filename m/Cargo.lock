@@ -54,6 +54,7 @@ version = "0.0.0"
 dependencies = [
  "m-rt",
  "sh",
+ "statically",
 ]
 
 [[package]]
@@ -62,6 +63,7 @@ version = "0.0.0"
 dependencies = [
  "mmio",
  "optimize",
+ "statically",
  "whoarchi",
 ]
 
@@ -81,6 +83,7 @@ version = "0.0.0"
 dependencies = [
  "m-rt",
  "sh",
+ "statically",
 ]
 
 [[package]]
@@ -89,6 +92,7 @@ version = "0.0.0"
 dependencies = [
  "m-rt",
  "sh",
+ "statically",
 ]
 
 [[package]]
@@ -143,6 +147,10 @@ version = "0.0.0"
 dependencies = [
  "semihosting",
 ]
+
+[[package]]
+name = "statically"
+version = "0.0.0"
 
 [[package]]
 name = "syn"

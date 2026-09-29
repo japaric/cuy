@@ -3,9 +3,10 @@
 use core::arch::asm;
 use core::cell::UnsafeCell;
 use core::mem::MaybeUninit;
-use core::sync::atomic::{self, AtomicBool};
+use core::sync::atomic::{self, AtomicBool, AtomicU8};
 
 use mmio::SafeRwRegs;
+use statically::{Owned, Shared};
 
 use crate::vtor::{ExternalInterrupt, VectActive};
 use crate::{scs, vtor};
@@ -135,7 +136,7 @@ impl Nvic {
     /// Sets the logical priority for the specified interrupt
     pub fn set_group_priority(&self, int: ExternalInterrupt, logical: u8) {
         assert!(logical <= self.max_group_priority());
-        let hw_prio = hw2logical(logical, self.num_group_priority_bits);
+        let hw_prio = logical2hw(logical, self.num_group_priority_bits);
 
         if let Some(ipr) = NVIC_IPR.get(int.nr.into()) {
             ipr.write(hw_prio);
@@ -187,6 +188,17 @@ impl Nvic {
         let offset = nr % 32;
         if let Some(ispr) = NVIC_ISPR.get(index.into()) {
             ispr.write(1 << offset)
+        }
+    }
+
+    /// TODO
+    pub fn set_ceiling<T>(&self, prio_ceiling: u8, mutex: Owned<Mutex<T>>) -> MutexRef<T> {
+        mutex.hw_ceiling.store(
+            logical2hw(prio_ceiling, self.num_group_priority_bits),
+            atomic::Ordering::Relaxed,
+        );
+        MutexRef {
+            inner: mutex.into(),
         }
     }
 
@@ -322,32 +334,119 @@ const fn max_prio(num_prio_bits: u8) -> u8 {
     ((1u16 << num_prio_bits) - 1) as u8
 }
 
-const fn hw2logical(logical: u8, num_prio_bits: u8) -> u8 {
+const fn logical2hw(logical: u8, num_prio_bits: u8) -> u8 {
     (max_prio(num_prio_bits) - logical) << (8 - num_prio_bits)
 }
 
 const _TESTS: () = {
-    assert!(224 == hw2logical(0, 3));
+    assert!(224 == logical2hw(0, 3));
     assert!(7 == max_prio(3));
-    assert!(0 == hw2logical(7, 3));
+    assert!(0 == logical2hw(7, 3));
 
-    assert!(240 == hw2logical(0, 4));
+    assert!(240 == logical2hw(0, 4));
     assert!(15 == max_prio(4));
-    assert!(0 == hw2logical(15, 4));
+    assert!(0 == logical2hw(15, 4));
 
-    assert!(248 == hw2logical(0, 5));
+    assert!(248 == logical2hw(0, 5));
     assert!(31 == max_prio(5));
-    assert!(0 == hw2logical(31, 5));
+    assert!(0 == logical2hw(31, 5));
 
-    assert!(252 == hw2logical(0, 6));
+    assert!(252 == logical2hw(0, 6));
     assert!(63 == max_prio(6));
-    assert!(0 == hw2logical(63, 6));
+    assert!(0 == logical2hw(63, 6));
 
-    assert!(254 == hw2logical(0, 7));
+    assert!(254 == logical2hw(0, 7));
     assert!(127 == max_prio(7));
-    assert!(0 == hw2logical(127, 7));
+    assert!(0 == logical2hw(127, 7));
 
-    assert!(255 == hw2logical(0, 8));
+    assert!(255 == logical2hw(0, 8));
     assert!(255 == max_prio(8));
-    assert!(0 == hw2logical(255, 8));
+    assert!(0 == logical2hw(255, 8));
 };
+
+/// A deadlock-free mutex based on the Priority Ceiling protocol
+pub struct Mutex<T> {
+    hw_ceiling: AtomicU8,
+    inner: UnsafeCell<T>,
+    locked: AtomicBool,
+}
+
+impl<T> Mutex<T> {
+    /// Constructs a new Mutex with the given initial `value`
+    pub fn new(value: T) -> Self {
+        Self {
+            hw_ceiling: AtomicU8::new(0),
+            inner: UnsafeCell::new(value),
+            locked: AtomicBool::new(false),
+        }
+    }
+}
+
+/// A reference to a `Mutex` that can be shared
+pub struct MutexRef<T> {
+    inner: Shared<Mutex<T>>,
+}
+
+impl<T> MutexRef<T> {
+    /// Locks the mutex by raising the priority of the current context
+    ///
+    /// This prevents other exceptions that share the mutex from starting
+    pub fn lock<R>(&self, f: impl FnOnce(&mut T) -> R) -> R {
+        assert!(
+            !self.inner.locked.load(atomic::Ordering::Relaxed),
+            "this mutex cannot be locked re-entrantly"
+        );
+
+        let static_hw_prio = get_static_hw_priority();
+        let hw_ceiling = self.inner.hw_ceiling.load(atomic::Ordering::Relaxed);
+        assert!(
+            static_hw_prio.is_none() || static_hw_prio.unwrap() >= hw_ceiling,
+            "attempted to take mutex from priority higher than the configured ceiling"
+        );
+
+        let restore = read_basepri();
+
+        // SAFETY: previous assertion ensures that this raises `BASEPRI` to the appropriate ceiling
+        unsafe { write_basepri(hw_ceiling) }
+        self.inner.locked.store(true, atomic::Ordering::Relaxed);
+
+        // SAFETY: inside a critical section
+        let ret = f(unsafe { &mut *self.inner.inner.get() });
+
+        self.inner.locked.store(false, atomic::Ordering::Relaxed);
+        // SAFETY: restores previous `BASEPRI` value
+        unsafe { write_basepri(restore) }
+
+        ret
+    }
+}
+
+impl<T> Copy for MutexRef<T> {}
+impl<T> Clone for MutexRef<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+// SAFETY: `lock` mechanism ensures synchronization to the data from different contexts
+unsafe impl<T> Send for MutexRef<T> where T: Send {}
+
+fn get_static_hw_priority() -> Option<u8> {
+    match VectActive::get() {
+        VectActive::ThreadMode => None,
+        VectActive::ExternalInterrupt(nr) => Some(NVIC_IPR.get(nr.into())?.read()),
+        _ => panic!("`Mutex` cannot be used from this context"),
+    }
+}
+
+fn read_basepri() -> u8 {
+    let value;
+    // SAFETY: has no impact on critical sections
+    unsafe { asm!("mrs {}, BASEPRI", out(reg) value, options(nomem, nostack, preserves_flags)) }
+    value
+}
+
+unsafe fn write_basepri(value: u8) {
+    // SAFETY: can potentially break a critical section
+    unsafe { asm!("msr BASEPRI, {}", in(reg) value, options(nomem, nostack, preserves_flags)) }
+}

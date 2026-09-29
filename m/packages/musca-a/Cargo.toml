@@ -4,5 +4,6 @@ edition = "2024"
 
 [dependencies]
 m-rt.path = "../m-rt"
+statically.path = "../../../any/packages/statically"
 
 sh.workspace = true

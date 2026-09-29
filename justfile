@@ -42,6 +42,15 @@ clippy:
         popd
     done
   done
+
+  for pkg in `ls any/packages/`; do
+      [ $pkg = "disasm" ] && continue
+      [ $pkg = "whoarchi" ] && continue
+      pushd any/packages/$pkg
+      cargo clippy --target thumbv7em-none-eabihf -- {{clippy_flags}}
+      popd
+  done
+
   cd any/packages/whoarchi && cargo clippy --target host-tuple -- {{clippy_flags}}
 
 # runs `llvm-nm` on the disasm application

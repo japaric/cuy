@@ -1,3 +1,5 @@
+//! Optimize a function for size regardless of the Cargo profile settings
+
 use proc_macro::TokenStream;
 use std::collections::BTreeMap;
 use std::hash::{DefaultHasher, Hash, Hasher};
